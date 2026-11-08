@@ -23,7 +23,8 @@ RUNS = ROOT / "runs"
 WRITER = "claude-opus-5-5"
 # arm name -> (writer model, effort). The plain names are Opus 5.5; added arms keep their own model.
 ARMS = {"medium": (WRITER, "medium"), "high": (WRITER, "high"), "xhigh": (WRITER, "xhigh"),
-        "fable-xhigh": ("claude-fable-5-1", "xhigh")}
+        "fable-xhigh": ("claude-fable-5-1", "xhigh"),
+        "argon-high": ("gemini-4-argon-high", "acp")}  # effort "acp" = Antigravity ACP (T3's Gemini provider)
 LEVELS = list(ARMS)
 JUDGE = "claude-opus-5"
 ITERATIONS = 3
@@ -57,6 +58,9 @@ def items():
 
 
 def call(model, effort, system, prompt, timeout=1800):
+    if effort == "acp":
+        import acp_writer
+        return acp_writer.write(model, prompt)
     cmd = BASE + ["--model", model, "--effort", effort, "--system-prompt", system]
     t = time.time()
     p = subprocess.run(cmd, input=prompt, capture_output=True, text=True, encoding="utf-8", timeout=timeout,
